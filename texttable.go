@@ -77,10 +77,57 @@ func (t *TextTable) SetHeader(headers ...string) error {
 
 /*
 
+SetHeaderArr adds header row from strings given
+
+*/
+func (t *TextTable) SetHeaderArr(headers []string) error {
+	if len(headers) == 0 {
+		return errors.New("no headers")
+	}
+
+	columnSize := len(headers)
+
+	t.width = columnSize
+	t.maxWidths = make([]int, columnSize)
+
+	rows := stringsToTableRow(headers)
+	t.updateColumnWidth(rows)
+
+	t.header = rows
+
+	return nil
+}
+
+/*
+
 AddRow adds column from strings given
 
 */
 func (t *TextTable) AddRow(strs ...string) error {
+	if len(strs) == 0 {
+		return errors.New("no rows")
+	}
+
+	if len(strs) > t.width {
+		return errors.New("row width should be less than header width")
+	}
+
+	padded := make([]string, t.width)
+	copy(padded, strs)
+	rows := stringsToTableRow(padded)
+	t.rows = append(t.rows, rows...)
+
+	t.updateColumnWidth(rows)
+
+	return nil
+}
+
+/*
+
+AddRowArr adds column from strings given
+
+*/
+func (t *TextTable) AddRowArr(strs []string) error {
 	if len(strs) == 0 {
 		return errors.New("no rows")
 	}
